@@ -86,7 +86,7 @@ def markdown_to_blocks(markdown):
     blocks = []
     block = markdown.split("\n\n")
     for b in block:
-        stripped_block = b.strip("")
+        stripped_block = b.strip()
         if stripped_block:
             blocks.append(stripped_block)
     return blocks
