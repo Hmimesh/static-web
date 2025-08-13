@@ -6,7 +6,14 @@ import os
 import shutil
 import sys
 
-basepath = sys.argv[0]
+if len(sys.argv) > 1:
+    basepath = sys.argv[1]
+else:
+    basepath = "/"
+if not basepath.endswith("/"):
+    basepath = basepath + "/"
+if not basepath.startswith("/"):
+    basepath = "/" +basepath
 
 class BlockType(Enum):
     PARAGRAPH = 1
@@ -68,7 +75,7 @@ def extrac_title(markdown):
             return line[1:] .strip()
     raise ValueError("No title found")
 
-def generate_page(from_path, template_path, dest_path, basepath="/"):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f'Generating {from_path} to {dest_path} using {template_path}')
     with open(from_path, "r") as f:
         markdown  = f.read()
@@ -77,11 +84,13 @@ def generate_page(from_path, template_path, dest_path, basepath="/"):
     node = markdown_to_html_node(markdown)
     better_n = node.to_html()
     title = extrac_title(markdown)
-    final = template.replace("{{ Content }}", better_n).replace("{{ Title }}", title).replace("{{ href=/ }}", f'href="{basepath}').replace("{{ 'src=/' }}", f'src="{basepath}"')
+    final = template.replace("{{ Content }}", better_n).replace("{{ Title }}", title)
+    final = final.replace('href="/', f'href="{basepath}')
+    final = final.replace('src="/', f'src="{basepath}')
     with open(dest_path, "w") as f:
         f.write(final)
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath="/"):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     content = os.listdir(dir_path_content)
     for file in content:
         if file.endswith(".md"):
@@ -98,7 +107,7 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, bas
 def main():
 
    content_to_destination()
-   generate_pages_recursive("./content", "./template.html", "./docs")
+   generate_pages_recursive("./content", "./template.html", "./docs", basepath)
 
 
 if __name__ == "__main__":
