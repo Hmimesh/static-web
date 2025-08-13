@@ -1,4 +1,7 @@
 import unittest
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from markdown_to_blocks import markdown_to_html_node
 
 class TestMarkdownToHtml(unittest.TestCase):

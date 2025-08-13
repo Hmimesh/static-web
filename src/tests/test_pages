@@ -1,0 +1,15 @@
+import unittest
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from main import *
+
+class TestPages(unittest.TestCase):
+    def test_header(self):
+        markdown = '#hello world\n\nthis is a paragraph'
+        title = extrac_title(markdown)
+        self.assertEqual(title, "hello world")
+    def test_exception_header(self):
+        markdown = 'this is a not a header'
+        with self.assertraises(valueError):
+            extrac_title(markdown)

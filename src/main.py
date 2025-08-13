@@ -58,10 +58,43 @@ def content_to_destination():
             shutil.copy(src, dst)
     copy_recursive(static, public)
     
+def extrac_title(markdown):
+    lines = markdown.split('\n')
+    for line in lines:
+        if line.startswith('#'):
+            return line[1:] .strip()
+    raise ValueError("No title found")
+
+def generate_page(from_path, template_path, dest_path):
+    print(f'Generating {from_path} to {dest_path} using {template_path}')
+    with open(from_path, "r") as f:
+        markdown  = f.read()
+    with open(template_path, 'r') as f:
+        template = f.read()
+    node = markdown_to_html_node(markdown)
+    better_n = node.to_html()
+    title = extrac_title(markdown)
+    final = template.replace("{{ Content }}", better_n).replace("{{ Title }}", title)
+    with open(dest_path, "w") as f:
+        f.write(final)
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    content = os.listdir(dir_path_content)
+    for file in content:
+        if file.endswith(".md"):
+            from_path = os.path.join(dir_path_content, file)
+            dest_path = os.path.join(dest_dir_path, file.replace(".md", ".html"))
+            generate_page(from_path, template_path, dest_path)
+        elif os.path.isdir(os.path.join(dir_path_content, file)):
+            if not os.path.isdir(os.path.join(dest_dir_path, file)):
+                os.makedirs(os.path.join(dest_dir_path, file))
+            generate_pages_recursive(os.path.join(dir_path_content, file), template_path, os.path.join(dest_dir_path, file))
+    
 
 
 def main():
    content_to_destination()
+   generate_pages_recursive("./content", "./template.html", "./public")
 
 
 if __name__ == "__main__":
