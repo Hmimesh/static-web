@@ -4,6 +4,9 @@ from split import *
 from markdown_to_blocks import *
 import os
 import shutil
+import sys
+
+basepath = sys.argv[0]
 
 class BlockType(Enum):
     PARAGRAPH = 1
@@ -43,9 +46,9 @@ def block_to_block_type(block):
 
 def content_to_destination():
     static = "./static/"
-    public = "./public/"
-    if os.path.exists(public):
-        shutil.rmtree("./public/")
+    doc = "./doc/"
+    if os.path.exists(doc):
+        shutil.rmtree("./doc/")
     def copy_recursive(src, dst):
         if os.path.isdir(src):
             print(f'copying {src} to {dst}')
@@ -56,7 +59,7 @@ def content_to_destination():
         else:
             print(f'copying {src} to {dst}')
             shutil.copy(src, dst)
-    copy_recursive(static, public)
+    copy_recursive(static, doc)
     
 def extrac_title(markdown):
     lines = markdown.split('\n')
@@ -65,7 +68,7 @@ def extrac_title(markdown):
             return line[1:] .strip()
     raise ValueError("No title found")
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath="/"):
     print(f'Generating {from_path} to {dest_path} using {template_path}')
     with open(from_path, "r") as f:
         markdown  = f.read()
@@ -74,27 +77,28 @@ def generate_page(from_path, template_path, dest_path):
     node = markdown_to_html_node(markdown)
     better_n = node.to_html()
     title = extrac_title(markdown)
-    final = template.replace("{{ Content }}", better_n).replace("{{ Title }}", title)
+    final = template.replace("{{ Content }}", better_n).replace("{{ Title }}", title).replace("{{ href=/ }}", f'href="{basepath}').replace("{{ 'src=/' }}", f'src="{basepath}"')
     with open(dest_path, "w") as f:
         f.write(final)
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath="/"):
     content = os.listdir(dir_path_content)
     for file in content:
         if file.endswith(".md"):
             from_path = os.path.join(dir_path_content, file)
             dest_path = os.path.join(dest_dir_path, file.replace(".md", ".html"))
-            generate_page(from_path, template_path, dest_path)
+            generate_page(from_path, template_path, dest_path, basepath)
         elif os.path.isdir(os.path.join(dir_path_content, file)):
             if not os.path.isdir(os.path.join(dest_dir_path, file)):
                 os.makedirs(os.path.join(dest_dir_path, file))
-            generate_pages_recursive(os.path.join(dir_path_content, file), template_path, os.path.join(dest_dir_path, file))
+            generate_pages_recursive(os.path.join(dir_path_content, file), template_path, os.path.join(dest_dir_path, file), basepath)
     
 
 
 def main():
+
    content_to_destination()
-   generate_pages_recursive("./content", "./template.html", "./public")
+   generate_pages_recursive("./content", "./template.html", "./doc")
 
 
 if __name__ == "__main__":
