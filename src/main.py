@@ -46,9 +46,9 @@ def block_to_block_type(block):
 
 def content_to_destination():
     static = "./static/"
-    doc = "./doc/"
-    if os.path.exists(doc):
-        shutil.rmtree("./doc/")
+    docs = "./docs/"
+    if os.path.exists(docs):
+        shutil.rmtree("./docs/")
     def copy_recursive(src, dst):
         if os.path.isdir(src):
             print(f'copying {src} to {dst}')
@@ -59,7 +59,7 @@ def content_to_destination():
         else:
             print(f'copying {src} to {dst}')
             shutil.copy(src, dst)
-    copy_recursive(static, doc)
+    copy_recursive(static, docs)
     
 def extrac_title(markdown):
     lines = markdown.split('\n')
@@ -98,7 +98,7 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, bas
 def main():
 
    content_to_destination()
-   generate_pages_recursive("./content", "./template.html", "./doc")
+   generate_pages_recursive("./content", "./template.html", "./docs")
 
 
 if __name__ == "__main__":
