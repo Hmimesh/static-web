@@ -1,4 +1,40 @@
 from textnode import TextNode, TextType
+from enum import Enum
+from split import *
+class BlockType(enum):
+    PARAGRAPH = 1
+    HEADING = 2
+    CODE = 3
+    QUOTE = 4 
+    UNORDERED_LIST = 5
+    ORDERED_LIST = 6
+
+def block_to_block_type(block):
+    lines = block.split("\n")
+    for i in range(1, 7):
+        prefix = "#" * i + " "
+        if block.startswith(prefix):
+            return BlockType.heading
+    if block.startswith("```") and block.endswith("```"):
+        return BlockType.code
+    if block.startswith(">"):
+        for line in lines:
+            if not line.startswith(">"):
+                return BlockType.PARAGRAPH
+        return BlockType.QUOTE
+    if block.startswith("- "):
+        for line in lines:
+            if not line.startswith("- "):
+                return BlockType.PARAGRAPH
+        return BlockType.UNORDERED_LIST
+    if block.startswith("1. "):
+        i = 1
+        for line in lines:
+            if not line.startswith(f"{i}. "):
+                return BlockType.PARAGRAPH
+            i += 1
+        return BlockType.ORDERED_LIST
+    return BlockType.PARAGRAPH
 
 def main():
     node = TextNode("This is normal", TextType.NORMAL_TEXT)
